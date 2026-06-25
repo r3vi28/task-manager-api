@@ -6,3 +6,58 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id Int @id() @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  role Role @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  projects Project[]
+  assignedTasks Task[]
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  ownerId Int
+  createdAt DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id])
+  tasks Task[]
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+  title String
+  description String?
+  status TaskStatus @default(TODO)
+  priority TaskPriority @default(MEDIUM)
+  assignedToId Int?
+  projectId Int
+  createdAt DateTime @default(now())
+  dueDate DateTime?
+
+  assignedTo User? @relation(fields: [assignedToId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+}
