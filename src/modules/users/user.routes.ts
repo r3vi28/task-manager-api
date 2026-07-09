@@ -2,9 +2,9 @@ import { Router } from "express";
 import type { Router as ExpressRouter } from "express";
 import { registerController, loginController } from "./user.controller";
 
-const router: ExpressRouter = Router();
+const userRouter: ExpressRouter = Router();
 
-router.post('/register', registerController);
-router.post('/login', loginController);
+userRouter.post('/register', registerController);
+userRouter.post('/login', loginController);
 
-export default router;
+export default userRouter;
