@@ -8,6 +8,11 @@ if (!connectionString) {
 }
 
 const adapter = new PrismaPg({ connectionString });
+
+/**
+ * Singleton Prisma client instance shared across the application.
+ * Uses PrismaPg adapter for a Rust-free PostgreSQL connection.
+ */
 const prisma = new PrismaClient({
   adapter,
   log: [{ level: "query", emit: "event" }],
