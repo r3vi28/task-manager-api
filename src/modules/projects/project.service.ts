@@ -24,12 +24,20 @@ export async function createProject(
     })
 }
 
+/**
+ * Retrieves all projects owned by the specified user, including their associated
+ * tasks. Returns an empty array if the user has no projects.
+ *
+ * @param {number} userId - The ID of the user whose projects should be retrieved.
+ * @returns {Promise<Project[]>} A promise that resolves to the user's projects with their tasks.
+ */
 export async function getProjects (userId: number) {
     return await prisma.project.findMany({
         where: { ownerId: userId},
         include: { tasks: true},
     })
 }
+
 /**
  * Retrieves a project by its ID, including its tasks, and verifies that it belongs
  * to the specified user before returning it.
