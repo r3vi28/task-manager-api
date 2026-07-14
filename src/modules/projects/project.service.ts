@@ -1,6 +1,7 @@
 import prisma from "../../lib/prisma";
 import { z } from 'zod';
 import { createProjectSchema, updateProjectSchema } from "./project.schema";
+import { getOwnedProject } from "../../lib/getOwnedProject";
 
 type createProjectInput = z.infer<typeof createProjectSchema>;
 type updateProjectInput = z.infer<typeof updateProjectSchema>;
@@ -103,33 +104,4 @@ export async function deleteProject(
     return prisma.project.delete({
         where: { id: projectId},
     });
-}
-
-/**
- * Retrieves a project by its ID and verifies that it exists and is owned by
- * the specified user.
- *
- * @param {number} projectId - The ID of the project to retrieve.
- * @param {number} userId - The ID of the user requesting access to the project.
- * @returns {Promise<Project>} A promise that resolves to the owned project.
- * @throws {Error} If the project does not exist.
- * @throws {Error} If the user is not the owner of the project.
- */
-async function getOwnedProject(
-    projectId: number,
-    userId: number
-) {
-    const project = await prisma.project.findUnique({
-        where: { id: projectId },
-    });
-
-    if (!project) {
-        throw new Error("Project not found");
-    }
-
-    if (project.ownerId !== userId) {
-        throw new Error("Access denied");
-    }
-
-    return project;
 }
