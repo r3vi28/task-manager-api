@@ -53,12 +53,20 @@ export async function getProjectById(
     projectId: number,
     userId: number
 ) {
-    await getOwnedProject(projectId, userId);
-
-    return prisma.project.findUnique({
+    const project = await prisma.project.findUnique({
         where: { id: projectId },
         include: { tasks: true },
     });
+
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    if (project.ownerId !== userId) {
+        throw new Error("Access denied");
+    }
+
+    return project;
 }
 
 /**
