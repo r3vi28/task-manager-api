@@ -17,6 +17,11 @@ export function handleServiceError(
                     message: err.message,
                 });
 
+            case "Task not found":
+                return res.status(404).json({
+                    message: err.message,
+                });
+
             case "Access denied":
                 return res.status(403).json({
                     message: err.message,
