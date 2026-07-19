@@ -1,13 +1,14 @@
 // src/modules/projects/__tests__/project.controller.test.ts
 import { Request, Response } from "express";
 import {
-  createProjectController,
-  getProjectsController,
-  getProjectByIdController,
-  updateProjectController,
-  deleteProjectController,
+    createProjectController,
+    getProjectsController,
+    getProjectByIdController,
+    updateProjectController,
+    deleteProjectController,
 } from "../project.controller";
 import * as projectService from "../project.service";
+import { AccessDeniedError, NotFoundError } from "../../../lib/errors";
 
 jest.mock("../project.service");
 
@@ -93,7 +94,7 @@ describe("getProjectByIdController", () => {
     it("should return 404 if project not found", async () => {
         const req = mockReqWithUser({ params: { id: "1" } });
         const res = mockRes();
-        mockGetProjectById.mockRejectedValue(new Error("Project not found"));
+        mockGetProjectById.mockRejectedValue(new NotFoundError("Project not found"));
 
         await getProjectByIdController(req, res);
 
@@ -103,7 +104,7 @@ describe("getProjectByIdController", () => {
     it("should return 403 if user is not owner", async () => {
         const req = mockReqWithUser({ params: { id: "1" } });
         const res = mockRes();
-        mockGetProjectById.mockRejectedValue(new Error("Access denied"));
+        mockGetProjectById.mockRejectedValue(new AccessDeniedError("Access denied"));
 
         await getProjectByIdController(req, res);
 
@@ -132,7 +133,7 @@ describe("updateProjectController", () => {
         body: { name: "Updated" },
         });
         const res = mockRes();
-        mockUpdateProject.mockRejectedValue(new Error("Project not found"));
+        mockUpdateProject.mockRejectedValue(new NotFoundError("Project not found"));
 
         await updateProjectController(req, res);
 
@@ -155,7 +156,7 @@ describe("deleteProjectController", () => {
     it("should return 403 if user is not owner", async () => {
         const req = mockReqWithUser({ params: { id: "1" } });
         const res = mockRes();
-        mockDeleteProject.mockRejectedValue(new Error("Access denied"));
+        mockDeleteProject.mockRejectedValue(new AccessDeniedError("Access denied"));
 
         await deleteProjectController(req, res);
 

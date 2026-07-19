@@ -8,6 +8,7 @@ import {
     deleteTaskController,
 } from "../task.controller";
 import * as taskService from "../task.service";
+import { NotFoundError } from "../../../lib/errors";
 
 jest.mock("../task.service");
 
@@ -78,7 +79,7 @@ describe("createTaskController", () => {
         body: { title: "Fix bug" },
         });
         const res = mockRes();
-        mockCreateTask.mockRejectedValue(new Error("Project not found"));
+        mockCreateTask.mockRejectedValue(new NotFoundError("Project not found"));
 
         await createTaskController(req, res);
 
@@ -131,7 +132,7 @@ describe("getTaskByIdController", () => {
     it("should return 404 if task not found", async () => {
         const req = mockReqWithUser({ params: { id: "1" } });
         const res = mockRes();
-        mockGetTaskById.mockRejectedValue(new Error("Task not found"));
+        mockGetTaskById.mockRejectedValue(new NotFoundError("Task not found"));
 
         await getTaskByIdController(req, res);
 
@@ -159,7 +160,7 @@ describe("updateTaskController", () => {
         body: { title: "Updated" },
         });
         const res = mockRes();
-        mockUpdateTask.mockRejectedValue(new Error("Task not found"));
+        mockUpdateTask.mockRejectedValue(new NotFoundError("Task not found"));
 
         await updateTaskController(req, res);
 
@@ -182,7 +183,7 @@ describe("deleteTaskController", () => {
     it("should return 404 if task not found", async () => {
         const req = mockReqWithUser({ params: { id: "1" } });
         const res = mockRes();
-        mockDeleteTask.mockRejectedValue(new Error("Task not found"));
+        mockDeleteTask.mockRejectedValue(new NotFoundError("Task not found"));
 
         await deleteTaskController(req, res);
 

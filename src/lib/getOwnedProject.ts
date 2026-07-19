@@ -1,3 +1,4 @@
+import { AccessDeniedError, NotFoundError } from "./errors";
 import prisma from "./prisma";
 
 /**
@@ -19,11 +20,11 @@ export async function getOwnedProject(
     });
 
     if (!project) {
-        throw new Error("Project not found");
+        throw new NotFoundError("Project not found");
     }
 
     if (project.ownerId !== userId) {
-        throw new Error("Access denied");
+        throw new AccessDeniedError("Access denied");
     }
 
     return project;

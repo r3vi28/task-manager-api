@@ -2,6 +2,7 @@ import prisma from "../../lib/prisma";
 import { z } from 'zod';
 import { createProjectSchema, updateProjectSchema } from "./project.schema";
 import { getOwnedProject } from "../../lib/getOwnedProject";
+import { AccessDeniedError, NotFoundError } from "../../lib/errors";
 
 type createProjectInput = z.infer<typeof createProjectSchema>;
 type updateProjectInput = z.infer<typeof updateProjectSchema>;
@@ -59,11 +60,11 @@ export async function getProjectById(
     });
 
     if (!project) {
-        throw new Error("Project not found");
+        throw new NotFoundError("Project not found");
     }
 
     if (project.ownerId !== userId) {
-        throw new Error("Access denied");
+        throw new AccessDeniedError("Access denied");
     }
 
     return project;

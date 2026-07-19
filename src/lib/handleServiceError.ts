@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { AppError } from "./errors";
 /**
  * Maps service errors to the appropriate HTTP response.
  *
@@ -10,28 +11,10 @@ export function handleServiceError(
     err: unknown,
     res: Response
 ): Response {
-    if (err instanceof Error) {
-        switch (err.message) {
-            case "Project not found":
-                return res.status(404).json({
-                    message: err.message,
-                });
-
-            case "Task not found":
-                return res.status(404).json({
-                    message: err.message,
-                });
-
-            case "Access denied":
-                return res.status(403).json({
-                    message: err.message,
-                });
-
-            default:
-                return res.status(400).json({
-                    message: err.message,
-                });
-        }
+    if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+            message: err.message,
+        });
     }
 
     return res.status(500).json({

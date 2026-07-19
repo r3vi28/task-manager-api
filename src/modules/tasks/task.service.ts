@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createTaskSchema, updateTaskSchema } from './task.schema';
 import { getOwnedProject } from '../../lib/getOwnedProject';
 import { TaskStatus, TaskPriority } from '../../../generated/prisma/enums';
+import { NotFoundError } from '../../lib/errors';
 
 type createTaskInput = z.infer<typeof createTaskSchema>;
 type updateTaskInput = z.infer<typeof updateTaskSchema>;
@@ -157,7 +158,7 @@ export async function getTaskWithProject(taskId: number) {
     });
 
     if (!task) {
-        throw new Error("Task not found");
+        throw new NotFoundError("Task not found");
     }
 
     return task;
