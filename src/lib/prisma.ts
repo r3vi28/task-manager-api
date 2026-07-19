@@ -15,7 +15,9 @@ const adapter = new PrismaPg({ connectionString });
  */
 const prisma = new PrismaClient({
   adapter,
-  log: [{ level: "query", emit: "event" }],
+  log: process.env["NODE_ENV"] === "development" 
+    ? [{ level: "query", emit: "event" }] 
+    : [],
 });
 
 export default prisma;
