@@ -4,7 +4,7 @@ import prisma from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import "dotenv/config";
-import { AccessDeniedError, NotFoundError } from "../../lib/errors";
+import { AccessDeniedError, AppError, NotFoundError } from "../../lib/errors";
 
 type RegisterInput = z.infer<typeof registerSchema>;
 type LoginInput = z.infer<typeof loginSchema>;
@@ -30,7 +30,7 @@ export async function register(data: RegisterInput) {
     });
 
     if (existingUser) {
-        throw new Error("Email already in use");
+        throw new AppError("Email already in use", 409); //409 conflict error
     }
 
     const hash = await bcrypt.hash(data.password, 10);
@@ -66,18 +66,18 @@ export async function login(data: LoginInput) {
     });
 
     if (!existingUser) {
-        throw new Error("Invalid credentials");
+        throw new AppError("Invalid credentials", 401); //401 Unauthorized
     }
 
     const comparedPassword = await bcrypt.compare(data.password, existingUser.password);
 
     if (!comparedPassword) {
-        throw new Error("Invalid credentials")
+        throw new AppError("Invalid credentials", 401); //401 Unauthorized
     }
         
     const jwtSecret = process.env["JWT_SECRET"];
     if (!jwtSecret) {
-        throw new Error("JWT_SECRET is not defined");
+        throw new AppError("JWT_SECRET is not defined", 500);
     }
 
     const token = jwt.sign(
