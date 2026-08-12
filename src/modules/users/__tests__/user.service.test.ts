@@ -102,6 +102,9 @@ describe("login", () => {
 
     expect(result).toHaveProperty("token");
     expect(typeof result.token).toBe("string");
+    expect(result).toHaveProperty("user");
+    expect(result.user).not.toHaveProperty("password");
+    expect(result.user.email).toBe("john@example.com");
   });
 
   it("should throw if user does not exist", async () => {

@@ -91,7 +91,9 @@ export async function login(data: LoginInput) {
         }
     );
 
-    return { token };
+    const { password, ...safeUser } = existingUser;
+
+    return { token, user: safeUser };
 }
 
 /**

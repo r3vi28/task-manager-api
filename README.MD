@@ -134,9 +134,18 @@ All protected endpoints require a `Bearer` token in the `Authorization` header.
 **Login response:**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "MEMBER",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
 }
 ```
+
+The `user` object contains the public fields of the authenticated user (the `password` field is excluded). The `token` is a signed JWT that encodes the user's `id` and `role`, valid for 7 days. The frontend should store the `token` and send it as a `Bearer` token in the `Authorization` header for subsequent requests.
 
 ---
 
