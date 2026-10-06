@@ -94,12 +94,12 @@ describe("loginController", () => {
         } as Request;
         const res = mockRes();
 
-        mockLogin.mockResolvedValue({ token: "jwt.token.here" });
+        mockLogin.mockResolvedValue({ token: "jwt.token.here", user: mockSafeUser });
 
         await loginController(req, res);
 
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ token: "jwt.token.here" });
+        expect(res.json).toHaveBeenCalledWith({ token: "jwt.token.here", user: mockSafeUser });
     });
 
     it("should return 400 with validation errors on invalid body", async () => {

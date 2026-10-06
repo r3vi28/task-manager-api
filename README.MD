@@ -4,6 +4,27 @@ A RESTful API for team-based task management. Users register, create projects, a
 
 ---
 
+## Live Demo
+
+| | |
+|---|---|
+| API base URL | `https://<your-service>.onrender.com` |
+| Swagger UI | `https://<your-service>.onrender.com/api/docs` |
+| Health check | `https://<your-service>.onrender.com/health` |
+
+**Demo accounts** (password for both: `Demo1234!`)
+
+| Email | Role |
+|---|---|
+| `member@demo.com` | `MEMBER` |
+| `admin@demo.com` | `ADMIN` |
+
+In Swagger, call `POST /api/auth/login`, copy the `token` from the response, click **Authorize** and paste it.
+
+> **Cold start:** the API runs on Render's free tier, which sleeps after ~15 minutes of inactivity. The first request after that can take **30–60 seconds** while the service wakes up. Subsequent requests are fast.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -22,7 +43,13 @@ A RESTful API for team-based task management. Users register, create projects, a
 ## Project Structure
 
 ```
+prisma/
+├── schema.prisma              # Data models
+├── migrations/                # SQL migrations
+└── seed.ts                    # Demo users, projects and tasks
 src/
+├── docs/
+│   └── openapi.ts             # OpenAPI spec served by Swagger UI at /api/docs
 ├── lib/
 │   ├── prisma.ts              # Singleton Prisma client with PrismaPg adapter
 │   ├── errors.ts              # Custom error classes (AppError, NotFoundError, AccessDeniedError)
@@ -43,9 +70,9 @@ src/
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24
 - PostgreSQL
-- pnpm
+- pnpm 11
 
 ### Installation
 
@@ -60,29 +87,28 @@ pnpm install
 # Generate Prisma client
 pnpm prisma generate
 
+# Create your local env file and fill in real values
+cp .env.example .env
+
 # Run database migrations
 pnpm prisma migrate deploy
+
+# (Optional) Load demo users, projects and tasks
+pnpm seed
 ```
 
 ### Environment Variables
 
-Create a `.env` file in the root of the project with the following variables:
+See [`.env.example`](.env.example) for a template.
 
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/taskmanager"
-JWT_SECRET="your_jwt_secret_here"
-JWT_EXPIRES_IN="7d"
-PORT=3000
-NODE_ENV=development
-```
-
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET` | Secret key used to sign JWT tokens |
-| `JWT_EXPIRES_IN` | Token expiration time (e.g. `7d`, `1h`) |
-| `PORT` | Port the server listens on |
-| `NODE_ENV` | Environment (`development` enables query logging) |
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string used by the app. In production, Neon's **pooled** URL (host contains `-pooler`) |
+| `DIRECT_URL` | No | Direct (non-pooled) connection used by Prisma CLI migrations. Needed only when `DATABASE_URL` points to a pooler; falls back to `DATABASE_URL` |
+| `JWT_SECRET` | Yes | Secret key used to sign JWT tokens (long random string) |
+| `PORT` | No | Port the server listens on (default `3000`; set automatically by Render) |
+| `NODE_ENV` | No | `development` enables query logging; `production` in deployment |
+| `CORS_ORIGIN` | No | Comma-separated list of allowed origins (e.g. `https://my-app.vercel.app`). When unset, all origins are allowed |
 
 ### Running the Server
 
@@ -94,6 +120,35 @@ pnpm dev
 pnpm build
 pnpm start
 ```
+
+---
+
+## Deployment
+
+Deployed as a free stack: **Render** (web service) → **Neon** (PostgreSQL).
+
+**Render web service settings**
+
+| Setting | Value |
+|---|---|
+| Runtime | Node |
+| Build command | `pnpm install --prod=false && pnpm prisma generate && pnpm build` |
+| Start command | `pnpm start` |
+| Health check path | `/health` |
+| Env vars | `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `CORS_ORIGIN` |
+
+`--prod=false` makes pnpm install devDependencies (TypeScript, Prisma CLI) even though `NODE_ENV=production` is set during the build.
+
+**Migrations and seed** run from a local machine against Neon (the free Render plan has no shell or pre-deploy command):
+
+```bash
+# .env temporarily pointing to Neon:
+#   DATABASE_URL = pooled URL, DIRECT_URL = direct URL
+pnpm prisma migrate deploy
+pnpm seed
+```
+
+Re-running `pnpm seed` is safe: it resets the demo users' passwords and only creates sample projects if they are missing.
 
 ---
 
@@ -112,6 +167,8 @@ The test suite includes 96 tests across 11 suites covering schemas, services, co
 ---
 
 ## API Endpoints
+
+Interactive documentation is available at `/api/docs` (Swagger UI). Health check: `GET /health` (public).
 
 All protected endpoints require a `Bearer` token in the `Authorization` header.
 
@@ -134,9 +191,18 @@ All protected endpoints require a `Bearer` token in the `Authorization` header.
 **Login response:**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "MEMBER",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
 }
 ```
+
+The `user` object contains the public fields of the authenticated user (the `password` field is excluded). The `token` is a signed JWT that encodes the user's `id` and `role`, valid for 7 days. The frontend should store the `token` and send it as a `Bearer` token in the `Authorization` header for subsequent requests.
 
 ---
 
