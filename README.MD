@@ -8,9 +8,9 @@ A RESTful API for team-based task management. Users register, create projects, a
 
 | | |
 |---|---|
-| API base URL | `https://<your-service>.onrender.com` |
-| Swagger UI | `https://<your-service>.onrender.com/api/docs` |
-| Health check | `https://<your-service>.onrender.com/health` |
+| API base URL | `https://task-manager-api-vk0z.onrender.com` |
+| Swagger UI | `https://task-manager-api-vk0z.onrender.com/api/docs` |
+| Health check | `https://task-manager-api-vk0z.onrender.com/health` |
 
 **Demo accounts** (password for both: `Demo1234!`)
 
