@@ -16,5 +16,6 @@
     "esModuleInterop": true,
     "types": ["jest"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/__tests__/**"]
 }
